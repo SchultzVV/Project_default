@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  banco:
+    build: ./services/banco
+    container_name: banco-dev
+    environment:
+      - LOG_LEVEL=DEBUG
+    env_file: .env
+    volumes:
+      - ./services/banco:/app
+      - ./services:/app/services
+      - ./outputs:/app/outputs
+      - ./tests:/app/tests
+    networks:
+      - backend
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["echo '🧪 Modo DEV ativo com log extendido' && python main.py"]
+
+  mqtt:
+    build: ./services/mqtt
+    container_name: mqtt-dev
+    environment:
+      - LOG_LEVEL=DEBUG
+    env_file: .env
+    volumes:
+      - ./services/mqtt:/app
+      - ./services:/app/services
+      - ./outputs:/app/outputs
+      - ./tests:/app/tests
+    networks:
+      - backend
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["echo '🧪 Modo DEV ativo com log extendido' && python main.py"]
+
+  ingestion:
+    build: ./services/ingestion
+    container_name: ingestion-dev
+    environment:
+      - LOG_LEVEL=DEBUG
+    env_file: .env
+    volumes:
+      - ./services/ingestion:/app
+      - ./services:/app/services
+      - ./outputs:/app/outputs
+      - ./tests:/app/tests
+    networks:
+      - backend
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["echo '🧪 Modo DEV ativo com log extendido' && python main.py"]
+
+  retrieval:
+    build: ./services/retrieval
+    container_name: retrieval-dev
+    environment:
+      - LOG_LEVEL=DEBUG
+    env_file: .env
+    volumes:
+      - ./services/retrieval:/app
+      - ./services:/app/services
+      - ./outputs:/app/outputs
+      - ./tests:/app/tests
+    networks:
+      - backend
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["echo '🧪 Modo DEV ativo com log extendido' && python main.py"]
+
+networks:
+  backend:
+    driver: bridge

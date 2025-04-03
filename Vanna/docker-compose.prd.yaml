@@ -1,0 +1,46 @@
+# version: '3.8'
+
+services:
+  banco:
+    image: ${REGISTRY}/${USER}/banco:latest
+    container_name: banco
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/banco:/app
+    networks:
+      - backend
+
+  mqtt:
+    image: ${REGISTRY}/${USER}/mqtt:latest
+    container_name: mqtt
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/mqtt:/app
+    networks:
+      - backend
+
+  ingestion:
+    image: ${REGISTRY}/${USER}/ingestion:latest
+    container_name: ingestion
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/ingestion:/app
+    networks:
+      - backend
+
+  retrieval:
+    image: ${REGISTRY}/${USER}/retrieval:latest
+    container_name: retrieval
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/retrieval:/app
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

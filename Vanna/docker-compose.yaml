@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  banco:
+    build: ./services/banco
+    container_name: banco
+    env_file: .env
+    volumes:
+      - ./services/banco:/app
+    networks:
+      - backend
+
+  mqtt:
+    build: ./services/mqtt
+    container_name: mqtt
+    env_file: .env
+    volumes:
+      - ./services/mqtt:/app
+    networks:
+      - backend
+
+  ingestion:
+    build: ./services/ingestion
+    container_name: ingestion
+    env_file: .env
+    volumes:
+      - ./services/ingestion:/app
+    networks:
+      - backend
+
+  retrieval:
+    build: ./services/retrieval
+    container_name: retrieval
+    env_file: .env
+    volumes:
+      - ./services/retrieval:/app
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
