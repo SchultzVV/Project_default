@@ -22,7 +22,6 @@ def create_service_structure(base_path, service_name):
             "if __name__ == '__main__':\n"
             "    print('Hello from main')\n"
         ),
-        os.path.join(service_path, "mqtt_client.py"): "",
         os.path.join(service_path, "requirements.txt"): "# Add dependencies here\n",
         os.path.join(service_path, "model", ".gitkeep"): "",
     }
@@ -30,17 +29,12 @@ def create_service_structure(base_path, service_name):
     for file_path, content in files.items():
         create_file(file_path, content)
 
-def generate_env_files(base_path):
-    env_content = "REGISTRY=registry.gitea.seuservidor.com\nUSER=seu-usuario\n"
-    create_file(os.path.join(base_path, ".env"), env_content)
-    create_file(os.path.join(base_path, ".env.prd"), env_content)
-
 def generate_docker_compose(base_path, services):
     compose_header = "version: '3.8'\n\nservices:\n"
     networks = "networks:\n  backend:\n    driver: bridge\n"
 
-    base, dev, prd = "", "", ""
-
+    # Compose padrão
+    base = ""
     for service in services:
         base += (
             f"  {service}:\n"
@@ -52,6 +46,10 @@ def generate_docker_compose(base_path, services):
             f"    networks:\n"
             f"      - backend\n\n"
         )
+
+    # Compose dev
+    dev = ""
+    for service in services:
         dev += (
             f"  {service}:\n"
             f"    build: ./services/{service}\n"
@@ -62,6 +60,7 @@ def generate_docker_compose(base_path, services):
             f"    volumes:\n"
             f"      - ./services/{service}:/app\n"
             f"      - ./services:/app/services\n"
+            f"      - ./videos:/app/videos\n"
             f"      - ./outputs:/app/outputs\n"
             f"      - ./tests:/app/tests\n"
             f"    networks:\n"
@@ -69,9 +68,13 @@ def generate_docker_compose(base_path, services):
             f"    entrypoint: [\"/bin/bash\", \"-c\"]\n"
             f"    command: [\"echo '🧪 Modo DEV ativo com log extendido' && python main.py\"]\n\n"
         )
+
+    # Compose prd
+    prd = ""
+    for service in services:
         prd += (
             f"  {service}:\n"
-            f"    image: ${{REGISTRY}}/${{USER}}/{service}:latest\n"
+            f"    image: registry.gitea.seuservidor.com/seu-usuario/{service}:latest\n"
             f"    container_name: {service}\n"
             f"    restart: unless-stopped\n"
             f"    env_file: .env.prd\n"
@@ -85,13 +88,14 @@ def generate_docker_compose(base_path, services):
     create_file(os.path.join(base_path, "docker-compose.dev.yaml"), compose_header + dev + networks)
     create_file(os.path.join(base_path, "docker-compose.prd.yaml"), "# version: '3.8'\n\nservices:\n" + prd + networks)
 
+
 def generate_makefile(base_path, services):
     base = (
         "# Variáveis configuráveis\n"
         "include .env\nexport\n\n"
         "ID ?= 1\n"
-        "REGISTRY = $(REGISTRY)\n"
-        "USER = $(USER)\n"
+        "REGISTRY = registry.gitea.seuservidor.com\n"
+        "USER = seu-usuario\n"
         f"IMAGE_NAME = $(REGISTRY)/$(USER)/{services[0]}\n"
         "TAG = latest\n\n"
         "COMPOSE = docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml --env-file .env\n\n"
@@ -117,8 +121,6 @@ def generate_makefile(base_path, services):
         )
 
     base += (
-        "start-camera:\n\tmosquitto_pub -h $(MQTT_BROKER_ADDRESS) -t commands/$(ID) -m \"start\"\n"
-        "stop-camera:\n\tmosquitto_pub -h $(MQTT_BROKER_ADDRESS) -t commands/$(ID) -m \"stop\"\n\n"
         "local-tests: test-unit test-integration\n"
         "test-unit:\n\tPYTHONPATH=. pytest tests/unit --disable-warnings -v\n"
         "test-integration:\n\tPYTHONPATH=. pytest tests/integration --disable-warnings -v\n"
@@ -128,12 +130,19 @@ def generate_makefile(base_path, services):
 
 def create_project_structure(project_root, service_names):
     dirs = [
-        "future_extensions", "outputs",
-        "tests", "tests/integration", "tests/unit",
-        "services", "services/__pycache__"
+        "outputs",
+        "tests",
+        "tests/integration",
+        "tests/unit",
+        "services"
     ]
     files = [
-        ".gitignore", "pytest.ini", "README.md", "services/__init__.py"
+        ".env",
+        ".env.prd",
+        ".gitignore",
+        "pytest.ini",
+        "README.md",
+        "services/__init__.py"
     ]
 
     for d in dirs:
@@ -145,7 +154,6 @@ def create_project_structure(project_root, service_names):
     for name in service_names:
         create_service_structure(project_root, name)
 
-    generate_env_files(project_root)
     generate_docker_compose(project_root, service_names)
     generate_makefile(project_root, service_names)
 
@@ -174,3 +182,5 @@ if __name__ == "__main__":
     create_project_structure(project_root, service_names)
 
     print(f"\n✅ Projeto '{project_root}' criado com {len(service_names)} serviço(s): {', '.join(service_names)}")
+
+
