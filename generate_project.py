@@ -30,7 +30,7 @@ def create_service_structure(base_path, service_name):
         create_file(file_path, content)
 
 def generate_docker_compose(base_path, services):
-    compose_header = "version: '3.8'\n\nservices:\n"
+    compose_header = "services:\n"
     networks = "networks:\n  backend:\n    driver: bridge\n"
 
     # Compose padrão
@@ -86,7 +86,7 @@ def generate_docker_compose(base_path, services):
 
     create_file(os.path.join(base_path, "docker-compose.yaml"), compose_header + base + networks)
     create_file(os.path.join(base_path, "docker-compose.dev.yaml"), compose_header + dev + networks)
-    create_file(os.path.join(base_path, "docker-compose.prd.yaml"), "# version: '3.8'\n\nservices:\n" + prd + networks)
+    create_file(os.path.join(base_path, "docker-compose.prd.yaml"), "services:\n" + prd + networks)
 
 
 def generate_makefile(base_path, services):
