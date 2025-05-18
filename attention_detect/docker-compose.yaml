@@ -1,0 +1,22 @@
+services:
+  storage:
+    build: ./services/storage
+    container_name: storage
+    env_file: .env
+    volumes:
+      - ./services/storage:/app
+    networks:
+      - backend
+
+  system_of_classification:
+    build: ./services/system_of_classification
+    container_name: system_of_classification
+    env_file: .env
+    volumes:
+      - ./services/system_of_classification:/app
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

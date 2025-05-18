@@ -1,0 +1,24 @@
+services:
+  storage:
+    image: registry.gitea.seuservidor.com/seu-usuario/storage:latest
+    container_name: storage
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/storage:/app
+    networks:
+      - backend
+
+  system_of_classification:
+    image: registry.gitea.seuservidor.com/seu-usuario/system_of_classification:latest
+    container_name: system_of_classification
+    restart: unless-stopped
+    env_file: .env.prd
+    volumes:
+      - ./services/system_of_classification:/app
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
